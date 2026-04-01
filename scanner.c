@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "tokens.h"
-
+#include <string.h>
 
 #define MAX_LEXEME 512  // Tamaño máximo de un identificador o número
 
@@ -43,7 +43,14 @@ void saveChar(char c) {
     }
 }
 
-
+int checkReserved() {
+    if (strcmp(tokenText, "if") == 0) return TK_IF;
+    if (strcmp(tokenText, "then") == 0) return TK_THEN;
+    if (strcmp(tokenText, "else") == 0) return TK_ELSE;
+    
+    // Si no coincide con ninguna, es un identificador normal
+    return TK_ID;
+}
 
 int nextToken() {
     int state = 0; // Estado inicial.
@@ -110,9 +117,11 @@ int nextToken() {
                 if (isletter(current_char) || isdigit(current_char)) {
                     saveChar(current_char);
                     continue;
+                } else {
+                    // Estado 10: Fin del lexema
+                    retract(1);
+                    return checkReserved(); // Decidimos si es ID o palabra reservada
                 }
-                retract(1);
-                return TK_ID;
 
             case 11:
                 if (isdigit(current_char)) {
