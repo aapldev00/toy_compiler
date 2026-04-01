@@ -1,2 +1,6 @@
-./scanner.o
-./toDO.md
+# Ignore compiled object files and local build artifacts
+*.o
+scanner
+
+# Ignore local todo file not meant for Git
+toDo.md

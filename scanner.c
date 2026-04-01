@@ -74,6 +74,8 @@ int nextToken() {
                         state = 1;
                         continue;
                     case '=':
+                        tokenInfo.code = TK_EQ;
+                        strcpy(tokenInfo.text, "=");
                         return TK_EQ; // state 5
                     case '>':
                         state = 6;
@@ -95,20 +97,30 @@ int nextToken() {
             case 1:
                 switch (current_char) {
                     case '>':
+                        tokenInfo.code = TK_NE;
+                        strcpy(tokenInfo.text, "<>");
                         return TK_NE; // state 2
                     case '=':
+                        tokenInfo.code = TK_LTE;
+                        strcpy(tokenInfo.text, "<=");
                         return TK_LTE; // state 3
                     default:
                         retract(1);
+                        tokenInfo.code = TK_LT;
+                        strcpy(tokenInfo.text, "<");
                         return TK_LT; // state 4
                 }
 
             case 6:
                 switch (current_char) {
                     case '=':
+                        tokenInfo.code = TK_GTE;
+                        strcpy(tokenInfo.text, ">=");
                         return TK_GTE; // state 7
                     default:
                         retract(1);
+                        tokenInfo.code = TK_GT;
+                        strcpy(tokenInfo.text, ">");
                         return TK_GT; // state 8
                 }
 
@@ -117,8 +129,10 @@ int nextToken() {
                     saveChar(current_char);
                     continue;
                 } else {
-                    retract(1); 
-                    return checkReserved(); // state 10
+                    retract(1);
+                    tokenInfo.code = checkReserved();
+                    strcpy(tokenInfo.text, tokenText); 
+                    return tokenInfo.code; // state 10
                 }
 
             case 11:
@@ -127,6 +141,8 @@ int nextToken() {
                     continue;
                 }
                 retract(1);
+                tokenInfo.code = TK_NUM;
+                strcpy(tokenInfo.text, tokenText);
                 return TK_NUM;
 
             default:
