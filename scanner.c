@@ -43,36 +43,87 @@ void saveChar(char c) {
     }
 }
 
+
+
 int nextToken() {
     int state = 0; // Estado inicial.
 
-    while(1) {
+    clearBuffer();
+
+    while (1) {
         current_char = nextChar(); // Lee el siguiente carácter.
 
         switch (state) {
             case 0:
+                if (current_char == '\0') {
+                    return TK_EOF;
+                }
+
                 if (current_char == ' ' || current_char == '\t' || current_char == '\n') {
                     continue; // Ignorar blancos (ws)
                 }
-                if (current_char == '<') { state = 1; continue; } 
-                if (current_char == '=') return TK_EQ;             
-                if (current_char == '>') { state = 6; continue; }
 
-                if (isletter(current_char)) { state = 9; continue; }
-                if (isdigit(current_char)) { state = 11; continue; }
-                
-                if (current_char == '\0') return TK_EOF;
-                return TK_ERROR;
-            case 1: 
-                if (current_char == '>') { return TK_NE; }
-                if (current_char == '=') { return TK_LTE;}
-                retract(1);
-                return TK_LT;
+                switch (current_char) {
+                    case '<':
+                        state = 1;
+                        continue;
+                    case '=':
+                        return TK_EQ; 
+                    case '>':
+                        state = 6;
+                        continue;
+                    default:
+                        if (isletter(current_char)) {
+                            saveChar(current_char);
+                            state = 9;
+                            continue;
+                        } else if (isdigit(current_char)) {
+                            saveChar(current_char);
+                            state = 11;
+                            continue;
+                        } else {
+                            return TK_ERROR;
+                        }
+                }
+
+            case 1:
+                switch (current_char) {
+                    case '>':
+                        return TK_NE;
+                    case '=':
+                        return TK_LTE;
+                    default:
+                        retract(1);
+                        return TK_LT;
+                }
+
             case 6:
-                if (current_char == '=') {return TK_GTE;}
-                retract(1);
-                return TK_GT;
+                switch (current_char) {
+                    case '=':
+                        return TK_GTE;
+                    default:
+                        retract(1);
+                        return TK_GT;
+                }
+
             case 9:
-                if (isletter(current_char) || isdigit(current_char)) {}
+                if (isletter(current_char) || isdigit(current_char)) {
+                    saveChar(current_char);
+                    continue;
+                }
+                retract(1);
+                return TK_ID;
+
+            case 11:
+                if (isdigit(current_char)) {
+                    saveChar(current_char);
+                    continue;
+                }
+                retract(1);
+                return TK_NUM;
+
+            default:
+                return TK_ERROR;
         }
+    }
 }
