@@ -1,0 +1,22 @@
+// tokens.h
+#ifndef TOKENS_H
+#define TOKENS_H
+
+// Códigos de retorno según la Tabla 2 de la conferencia
+typedef enum {
+    TK_IF = 256,
+    TK_THEN,
+    TK_ELSE,
+    TK_ID,
+    TK_NUM,
+    TK_LT,   // <
+    TK_LTE,  // <=
+    TK_EQ,   // =
+    TK_NE,   // <>
+    TK_GT,   // >
+    TK_GTE,  // >=
+    TK_ERROR,
+    TK_EOF   // Fin de archivo
+} TokenType;
+
+#endif
