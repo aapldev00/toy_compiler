@@ -3,18 +3,16 @@
 #include "tokens.h"
 #include <string.h>
 
-#define MAX_LEXEME 512  // Tamaño máximo de un identificador o número
-
 static char tokenText[MAX_LEXEME]; // El buffer físico
 static int lex_idx = 0;            // El índice para saber dónde escribir el siguiente carácter del lexema actual.
+TInfo tokenInfo; // Variable global para almacenar la información del token actual, que el Parser puede leer después de llamar a nextToken().
 
 // Prototipos de funciones para el escáner
 char nextChar();
 void retract(int chars);
 
-
 static char *source_ptr; // Puntero a la fuente de entrada.
-static char current_char; // Variable para almacenar el carácter actual.
+
 
 char nextChar() {
     return *source_ptr++; // Primero avanza y luego retorna el carácter actual, ++ tiene mayor prioridad que *.
@@ -54,6 +52,7 @@ int checkReserved() {
 
 int nextToken() {
     int state = 0; // Estado inicial.
+    char current_char; // Variable para almacenar el carácter actual.
 
     clearBuffer();
 
@@ -75,7 +74,7 @@ int nextToken() {
                         state = 1;
                         continue;
                     case '=':
-                        return TK_EQ; 
+                        return TK_EQ; // state 5
                     case '>':
                         state = 6;
                         continue;
@@ -96,21 +95,21 @@ int nextToken() {
             case 1:
                 switch (current_char) {
                     case '>':
-                        return TK_NE;
+                        return TK_NE; // state 2
                     case '=':
-                        return TK_LTE;
+                        return TK_LTE; // state 3
                     default:
                         retract(1);
-                        return TK_LT;
+                        return TK_LT; // state 4
                 }
 
             case 6:
                 switch (current_char) {
                     case '=':
-                        return TK_GTE;
+                        return TK_GTE; // state 7
                     default:
                         retract(1);
-                        return TK_GT;
+                        return TK_GT; // state 8
                 }
 
             case 9:
@@ -118,9 +117,8 @@ int nextToken() {
                     saveChar(current_char);
                     continue;
                 } else {
-                    // Estado 10: Fin del lexema
-                    retract(1);
-                    return checkReserved(); // Decidimos si es ID o palabra reservada
+                    retract(1); 
+                    return checkReserved(); // state 10
                 }
 
             case 11:
