@@ -4,7 +4,7 @@
 #include "scanner.h"
 
 // Variable global para el símbolo que estamos mirando (lookahead)
-int lookahead;
+static int lookahead;
 
 // Prototipos de las reglas de la gramática.
 void if_stmt();
@@ -13,7 +13,7 @@ void condition();
 void expression();
 void statement();
 
-// Avanza y verifica tokens
+// Avanza y verifica tokens.
 void match(int expectedToken) {
     if (lookahead == expectedToken) {
         lookahead = nextToken();
@@ -38,7 +38,7 @@ void expression() {
 
 // <condition> ::= <expression> RELOP <expression>
 void condition() {
-    expression(); // Lado izquierdo
+    expression();
     
     // Verificamos si el lookahead es cualquiera de los 6 operadores relacionales
     if (lookahead >= TK_LT && lookahead <= TK_GTE) {
@@ -68,7 +68,7 @@ void else_part() {
         match(TK_ELSE);
         statement();
     }
-    // Si no hay ELSE, el CDR simplemente no hace nada y termina la regla con éxito
+    // Si no hay ELSE, el CDR simplemente no hace nada y termina la regla con éxito.
 }
 
 // <if_stmt> ::= if <condition> then <statement> <else_part>
@@ -82,9 +82,9 @@ void if_stmt() {
 
 // Función principal del Parser
 void parse() {
-    lookahead = nextToken(); // Inicializamos el lookahead
+    lookahead = nextToken();                                    // Inicializamos el lookahead
     
-    if_stmt(); // Iniciamos con la regla raíz
+    if_stmt();                                                  // Iniciamos con el axioma
     
     if (lookahead == TK_EOF) {
         printf("Analisis sintactico exitoso.\n");
