@@ -14,66 +14,75 @@ void retract(int chars);
 static char *source_ptr; // Puntero a la fuente de entrada.
 
 
+// Inicializa el escáner con la cadena de fuente.
+void initScanner(const char *source) {
+    source_ptr = (char *)source;                        // Apuntamos al inicio del código fuente
+    clearBuffer();                                      // Limpiamos el buffer de lexemas
+}
+
+// Nos devuelve el siguiente carácter de la fuente y avanza el puntero.
 char nextChar() {
-    return *source_ptr++; // Primero avanza y luego retorna el carácter actual, ++ tiene mayor prioridad que *.
+    return *source_ptr++;                               // Primero avanza y luego retorna el carácter actual, ++ tiene mayor prioridad que *.
 }
 
+// Retrocede el puntero de la fuente por la cantidad de caracteres especificada.
 void retract(int chars) {
-    source_ptr -= chars; // Retrocede el puntero de la fuente por la cantidad de caracteres especificada.
+    source_ptr -= chars; 
 }
 
-
-int isletter(char c) { // El nombre realmente no es muy específico.   
-    return isalpha(c) || c == '_'; // Letras y guiones bajos son considerados válidos como carácteres iniciales de identificadores.
+// Verifica si el carácter es una letra o un guion bajo, válido para iniciar identificadores.
+int isletter(char c) {   
+    return isalpha(c) || c == '_';                       // Letras y guiones bajos son considerados válidos como carácteres iniciales de identificadores.
 }
 
-// Limpia el buffer para empezar un nuevo token
+// Limpia el buffer para empezar un nuevo token.
 void clearBuffer() {
     lex_idx = 0;
     tokenText[0] = '\0';
 }
 
-// Agrega un carácter al final del lexema actual
+// Agrega un carácter al final del lexema actual.
 void saveChar(char c) {
     if (lex_idx < MAX_LEXEME - 1) {
-        tokenText[lex_idx++] = c; // Primero se guarda y despues se incrementa el índice.
-        tokenText[lex_idx] = '\0'; // Mantener siempre el fin de cadena
+        tokenText[lex_idx++] = c;                       // Primero se guarda y despues se incrementa el índice.
+        tokenText[lex_idx] = '\0';                      // Mantener siempre el fin de cadena.
     }
 }
 
+// Establece el token actual con su código y texto.
 void setToken(int code, const char *text) {
     tokenInfo.code = code;
-    strncpy(tokenInfo.text, text, MAX_LEXEME - 1);
-    tokenInfo.text[MAX_LEXEME - 1] = '\0';
+    strncpy(tokenInfo.text, text, MAX_LEXEME - 1);      // Copia el texto al tokenInfo, asegurando no exceder el tamaño máximo.
+    tokenInfo.text[MAX_LEXEME - 1] = '\0';              // Asegura que el texto esté siempre terminado en null.
 }
 
+// Verifica si el lexema actual es una palabra reservada y devuelve su código, o TK_ID si no lo es.
 int checkReserved() {
     if (strcmp(tokenText, "if") == 0) return TK_IF;
     if (strcmp(tokenText, "then") == 0) return TK_THEN;
     if (strcmp(tokenText, "else") == 0) return TK_ELSE;
-    
-    // Si no coincide con ninguna, es un identificador normal
-    return TK_ID;
+        
+    return TK_ID;                                       // Si no coincide con ninguna, es un identificador normal.
 }
 
 int nextToken() {
-    int state = 0; // Estado inicial.
-    char current_char; // Variable para almacenar el carácter actual.
+    int state = 0;                                      // Estado inicial.
+    char current_char;                                  // Variable para almacenar el carácter actual.
 
     clearBuffer();
 
     while (1) {
-        current_char = nextChar(); // Lee el siguiente carácter.
+        current_char = nextChar();                     
 
         switch (state) {
             case 0:
                 if (current_char == '\0') {
-                    setToken(TK_EOF, "EOF"); // O un string vacío ""
+                    setToken(TK_EOF, "EOF");            // O un string vacío ""
                     return TK_EOF;
                 }
 
                 if (current_char == ' ' || current_char == '\t' || current_char == '\n') {
-                    continue; // Ignorar blancos (ws)
+                    continue;                           // Ignorar blancos (ws)
                 }
 
                 switch (current_char) {
@@ -168,7 +177,7 @@ int nextToken() {
                     continue;
                 }
                 setToken(TK_ERROR, tokenText);
-                return TK_ERROR; // Error: se esperaba dígito después de '.'
+                return TK_ERROR; 
 
             
             case 13: // Parte decimal
@@ -203,7 +212,7 @@ int nextToken() {
                         break;
                     default:
                         setToken(TK_ERROR, tokenText);
-                        return TK_ERROR; // Error: "1.2E" sin signo ni número
+                        return TK_ERROR; 
                 }
                 continue;
 
