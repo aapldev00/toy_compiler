@@ -3,16 +3,14 @@
 #include "tokens.h"
 #include <string.h>
 
-static char tokenText[MAX_LEXEME]; // El buffer físico
-static int lex_idx = 0;            // El índice para saber dónde escribir el siguiente carácter del lexema actual.
-TInfo tokenInfo; // Variable global para almacenar la información del token actual, que el Parser puede leer después de llamar a nextToken().
+static char tokenText[MAX_LEXEME];                     // El buffer físico donde se guarda el lexema en procesamiento
+static int lex_idx = 0;                                // El índice para saber dónde escribir el siguiente carácter del lexema actual.
+static char *source_ptr;                               // Puntero a la fuente de entrada.
+TInfo tokenInfo;                                       // Variable global para almacenar la información del token actual.
 
 // Prototipos de funciones para el escáner
 char nextChar();
 void retract(int chars);
-
-static char *source_ptr; // Puntero a la fuente de entrada.
-
 
 // Inicializa el escáner con la cadena de fuente.
 void initScanner(const char *source) {
