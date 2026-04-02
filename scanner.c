@@ -41,6 +41,12 @@ void saveChar(char c) {
     }
 }
 
+void setToken(int code, const char *text) {
+    tokenInfo.code = code;
+    strncpy(tokenInfo.text, text, MAX_LEXEME - 1);
+    tokenInfo.text[MAX_LEXEME - 1] = '\0';
+}
+
 int checkReserved() {
     if (strcmp(tokenText, "if") == 0) return TK_IF;
     if (strcmp(tokenText, "then") == 0) return TK_THEN;
@@ -62,6 +68,7 @@ int nextToken() {
         switch (state) {
             case 0:
                 if (current_char == '\0') {
+                    setToken(TK_EOF, "EOF"); // O un string vacío ""
                     return TK_EOF;
                 }
 
@@ -74,8 +81,7 @@ int nextToken() {
                         state = 1;
                         continue;
                     case '=':
-                        tokenInfo.code = TK_EQ;
-                        strcpy(tokenInfo.text, "=");
+                        setToken(TK_EQ, "=");
                         return TK_EQ; // state 5
                     case '>':
                         state = 6;
@@ -90,6 +96,9 @@ int nextToken() {
                             state = 11;
                             continue;
                         } else {
+                            clearBuffer();
+                            saveChar(current_char);
+                            setToken(TK_ERROR, tokenText);
                             return TK_ERROR;
                         }
                 }
@@ -97,30 +106,25 @@ int nextToken() {
             case 1:
                 switch (current_char) {
                     case '>':
-                        tokenInfo.code = TK_NE;
-                        strcpy(tokenInfo.text, "<>");
+                        setToken(TK_NE, "<>");
                         return TK_NE; // state 2
                     case '=':
-                        tokenInfo.code = TK_LTE;
-                        strcpy(tokenInfo.text, "<=");
+                        setToken(TK_LTE, "<=");
                         return TK_LTE; // state 3
                     default:
                         retract(1);
-                        tokenInfo.code = TK_LT;
-                        strcpy(tokenInfo.text, "<");
+                        setToken(TK_LT, "<");
                         return TK_LT; // state 4
                 }
 
             case 6:
                 switch (current_char) {
                     case '=':
-                        tokenInfo.code = TK_GTE;
-                        strcpy(tokenInfo.text, ">=");
+                        setToken(TK_GTE, ">=");
                         return TK_GTE; // state 7
                     default:
                         retract(1);
-                        tokenInfo.code = TK_GT;
-                        strcpy(tokenInfo.text, ">");
+                        setToken(TK_GT, ">");
                         return TK_GT; // state 8
                 }
 
@@ -130,9 +134,9 @@ int nextToken() {
                     continue;
                 } else {
                     retract(1);
-                    tokenInfo.code = checkReserved();
-                    strcpy(tokenInfo.text, tokenText); 
-                    return tokenInfo.code; // state 10
+                    int code = checkReserved();
+                    setToken(code, tokenText);
+                    return code; // state 10
                 }
 
             case 11: // Parte entera
@@ -152,8 +156,7 @@ int nextToken() {
                         break;
                     default:
                         retract(1);
-                        tokenInfo.code = TK_NUM;
-                        strcpy(tokenInfo.text, tokenText);
+                        setToken(TK_NUM, tokenText);
                         return TK_NUM;
                 }
                 continue;
@@ -164,6 +167,7 @@ int nextToken() {
                     state = 13;
                     continue;
                 }
+                setToken(TK_ERROR, tokenText);
                 return TK_ERROR; // Error: se esperaba dígito después de '.'
 
             
@@ -180,8 +184,7 @@ int nextToken() {
                         break;
                     default:
                         retract(1);
-                        tokenInfo.code = TK_NUM;
-                        strcpy(tokenInfo.text, tokenText);
+                        setToken(TK_NUM, tokenText);
                         return TK_NUM;
                 }
                 continue;
@@ -199,6 +202,7 @@ int nextToken() {
                         state = 15;
                         break;
                     default:
+                        setToken(TK_ERROR, tokenText);
                         return TK_ERROR; // Error: "1.2E" sin signo ni número
                 }
                 continue;
@@ -209,6 +213,7 @@ int nextToken() {
                     state = 16;
                     continue;
                 }
+                setToken(TK_ERROR, tokenText);
                 return TK_ERROR;
 
             case 16: // Dígitos del exponente
@@ -217,11 +222,11 @@ int nextToken() {
                     continue;
                 }
                 retract(1);
-                tokenInfo.code = TK_NUM;
-                strcpy(tokenInfo.text, tokenText);
+                setToken(TK_NUM, tokenText);
                 return TK_NUM;
                 
             default:
+                setToken(TK_ERROR, tokenText);
                 return TK_ERROR;
                         
         }
