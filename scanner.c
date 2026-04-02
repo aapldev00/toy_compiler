@@ -135,7 +135,83 @@ int nextToken() {
                     return tokenInfo.code; // state 10
                 }
 
-            case 11:
+            case 11: // Parte entera
+                if (isdigit(current_char)) {
+                    saveChar(current_char);
+                    continue;
+                }
+                switch (current_char) {
+                    case '.':
+                        saveChar(current_char);
+                        state = 12;
+                        break;
+                    case 'E':
+                    case 'e':
+                        saveChar(current_char);
+                        state = 14;
+                        break;
+                    default:
+                        retract(1);
+                        tokenInfo.code = TK_NUM;
+                        strcpy(tokenInfo.text, tokenText);
+                        return TK_NUM;
+                }
+                continue;
+
+            case 12: // Tras el punto '.'
+                if (isdigit(current_char)) {
+                    saveChar(current_char);
+                    state = 13;
+                    continue;
+                }
+                return TK_ERROR; // Error: se esperaba dígito después de '.'
+
+            
+            case 13: // Parte decimal
+                if (isdigit(current_char)) {
+                    saveChar(current_char);
+                    continue;
+                }
+                switch (current_char) {
+                    case 'E':
+                    case 'e':
+                        saveChar(current_char);
+                        state = 14;
+                        break;
+                    default:
+                        retract(1);
+                        tokenInfo.code = TK_NUM;
+                        strcpy(tokenInfo.text, tokenText);
+                        return TK_NUM;
+                }
+                continue;
+
+            case 14: // Exponente 'E' o 'e'
+                if (isdigit(current_char)) {
+                    saveChar(current_char);
+                    state = 16;
+                    continue;
+                }
+                switch (current_char) {
+                    case '+':
+                    case '-':
+                        saveChar(current_char);
+                        state = 15;
+                        break;
+                    default:
+                        return TK_ERROR; // Error: "1.2E" sin signo ni número
+                }
+                continue;
+
+            case 15: // Signo del exponente
+                if (isdigit(current_char)) {
+                    saveChar(current_char);
+                    state = 16;
+                    continue;
+                }
+                return TK_ERROR;
+
+            case 16: // Dígitos del exponente
                 if (isdigit(current_char)) {
                     saveChar(current_char);
                     continue;
@@ -144,9 +220,10 @@ int nextToken() {
                 tokenInfo.code = TK_NUM;
                 strcpy(tokenInfo.text, tokenText);
                 return TK_NUM;
-
+                
             default:
                 return TK_ERROR;
+                        
         }
     }
 }
