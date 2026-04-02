@@ -9,9 +9,7 @@
 
 
 ![alt text](https://img.shields.io/badge/Context-Aprendizaje%20Acad%C3%A9mico-orange.svg)
-
 ---
-
 ### 🏗️ Anatomía del Proyecto
 
 | Componente | El Rol
