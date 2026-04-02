@@ -4,3 +4,4 @@ scanner
 
 # Ignore local todo file not meant for Git
 toDo.md
+toy_compiler

@@ -11,6 +11,7 @@ TInfo tokenInfo;                                       // Variable global para a
 // Prototipos de funciones para el escáner
 char nextChar();
 void retract(int chars);
+void clearBuffer();
 
 // Inicializa el escáner con la cadena de fuente.
 void initScanner(const char *source) {
