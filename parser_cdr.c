@@ -7,11 +7,11 @@
 static int lookahead;
 
 // Prototipos de las reglas de la gramática.
-void if_stmt();
-void else_part();
-void condition();
-void expression();
-void statement();
+void E();
+void E_prime();
+void T();
+void T_prime();
+void F();
 
 // Avanza y verifica tokens.
 void match(int expectedToken) {
@@ -24,71 +24,64 @@ void match(int expectedToken) {
     }
 }
 
-// <expression> ::= ID | NUM
-void expression() {
-    if (lookahead == TK_ID) {
+// F → ( E ) | id | num
+void F() {
+    if (lookahead == TK_LPAREN) {
+        match(TK_LPAREN);
+        E();
+        match(TK_RPAREN);
+    } else if (lookahead == TK_ID) {
         match(TK_ID);
     } else if (lookahead == TK_NUM) {
         match(TK_NUM);
     } else {
-        printf("Error: Se esperaba Identificador o Numero\n");
+        printf("Error: Se esperaba '(', identificador o número\n");
         exit(1);
     }
 }
 
-// <condition> ::= <expression> RELOP <expression>
-void condition() {
-    expression();
-    
-    // Verificamos si el lookahead es cualquiera de los 6 operadores relacionales
-    if (lookahead >= TK_LT && lookahead <= TK_GTE) {
-        match(lookahead);                                                            // Tenemos que consumir el operador.
-    } else {
-        printf("Error: Se esperaba un operador relacional (<, >, =, etc.)\n");
-        exit(1);
+// T′ → * F T′ | ε
+void T_prime() {
+    if (lookahead == TK_MULT) {
+        match(TK_MULT);
+        F();
+        T_prime();
     }
-    
-    expression(); 
+    // ε: no hacer nada
 }
 
-// <statement> ::= ID = <expression> | <if_stmt>
-void statement() {
-    if (lookahead == TK_IF) {
-        if_stmt();
-    } else {
-        match(TK_ID);
-        match(TK_EQ);
-        expression();
-    }
+// T → F T′
+void T() {
+    F();
+    T_prime();
 }
 
-// <else_part> ::= else <statement> | epsilon
-void else_part() {
-    if (lookahead == TK_ELSE) {
-        match(TK_ELSE);
-        statement();
+// E′ → + T E′ | ε
+void E_prime() {
+    if (lookahead == TK_PLUS) {
+        match(TK_PLUS);
+        T();
+        E_prime();
     }
-    // Si no hay ELSE, el CDR simplemente no hace nada y termina la regla con éxito.
+    // ε: no hacer nada
 }
 
-// <if_stmt> ::= if <condition> then <statement> <else_part>
-void if_stmt() {
-    match(TK_IF);
-    condition();
-    match(TK_THEN);
-    statement();
-    else_part();
+// E → T E′
+void E() {
+    T();
+    E_prime();
 }
 
 // Función principal del Parser
 void parse() {
-    lookahead = nextToken();                                    // Inicializamos el lookahead
+    lookahead = nextToken();  // Inicializamos el lookahead
     
-    if_stmt();                                                  // Iniciamos con el axioma
+    E();  // Iniciamos con el axioma E
     
     if (lookahead == TK_EOF) {
-        printf("Analisis sintactico exitoso.\n");
+        printf("Análisis sintáctico exitoso.\n");
     } else {
-        printf("Error: Datos inesperados despues del final de la sentencia.\n");
+        printf("Error: Datos inesperados después del final de la expresión.\n");
+        exit(1);
     }
 }

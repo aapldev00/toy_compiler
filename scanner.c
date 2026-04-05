@@ -57,11 +57,8 @@ void setToken(int code, const char *text) {
 
 // Verifica si el lexema actual es una palabra reservada y devuelve su código, o TK_ID si no lo es.
 int checkReserved() {
-    if (strcmp(tokenText, "if") == 0) return TK_IF;
-    if (strcmp(tokenText, "then") == 0) return TK_THEN;
-    if (strcmp(tokenText, "else") == 0) return TK_ELSE;
-        
-    return TK_ID;                                       // Si no coincide con ninguna, es un identificador normal.
+    // No hay palabras reservadas en esta gramática
+    return TK_ID;
 }
 
 int nextToken() {
@@ -85,15 +82,18 @@ int nextToken() {
                 }
 
                 switch (current_char) {
-                    case '<':
-                        state = 1;
-                        continue;
-                    case '=':
-                        setToken(TK_EQ, "=");
-                        return TK_EQ; // state 5
-                    case '>':
-                        state = 6;
-                        continue;
+                    case '+':
+                        setToken(TK_PLUS, "+");
+                        return TK_PLUS;
+                    case '*':
+                        setToken(TK_MULT, "*");
+                        return TK_MULT;
+                    case '(':
+                        setToken(TK_LPAREN, "(");
+                        return TK_LPAREN;
+                    case ')':
+                        setToken(TK_RPAREN, ")");
+                        return TK_RPAREN;
                     default:
                         if (isletter(current_char)) {
                             saveChar(current_char);
@@ -112,29 +112,12 @@ int nextToken() {
                 }
 
             case 1:
-                switch (current_char) {
-                    case '>':
-                        setToken(TK_NE, "<>");
-                        return TK_NE; // state 2
-                    case '=':
-                        setToken(TK_LTE, "<=");
-                        return TK_LTE; // state 3
-                    default:
-                        retract(1);
-                        setToken(TK_LT, "<");
-                        return TK_LT; // state 4
-                }
+                // Removed, no longer needed
+                break;
 
             case 6:
-                switch (current_char) {
-                    case '=':
-                        setToken(TK_GTE, ">=");
-                        return TK_GTE; // state 7
-                    default:
-                        retract(1);
-                        setToken(TK_GT, ">");
-                        return TK_GT; // state 8
-                }
+                // Removed, no longer needed
+                break;
 
             case 9:
                 if (isletter(current_char) || isdigit(current_char)) {
@@ -147,91 +130,15 @@ int nextToken() {
                     return code; // state 10
                 }
 
-            case 11: // Parte entera
+            case 11: // Números enteros
                 if (isdigit(current_char)) {
                     saveChar(current_char);
                     continue;
+                } else {
+                    retract(1);
+                    setToken(TK_NUM, tokenText);
+                    return TK_NUM;
                 }
-                switch (current_char) {
-                    case '.':
-                        saveChar(current_char);
-                        state = 12;
-                        break;
-                    case 'E':
-                    case 'e':
-                        saveChar(current_char);
-                        state = 14;
-                        break;
-                    default:
-                        retract(1);
-                        setToken(TK_NUM, tokenText);
-                        return TK_NUM;
-                }
-                continue;
-
-            case 12: // Tras el punto '.'
-                if (isdigit(current_char)) {
-                    saveChar(current_char);
-                    state = 13;
-                    continue;
-                }
-                setToken(TK_ERROR, tokenText);
-                return TK_ERROR; 
-
-            
-            case 13: // Parte decimal
-                if (isdigit(current_char)) {
-                    saveChar(current_char);
-                    continue;
-                }
-                switch (current_char) {
-                    case 'E':
-                    case 'e':
-                        saveChar(current_char);
-                        state = 14;
-                        break;
-                    default:
-                        retract(1);
-                        setToken(TK_NUM, tokenText);
-                        return TK_NUM;
-                }
-                continue;
-
-            case 14: // Exponente 'E' o 'e'
-                if (isdigit(current_char)) {
-                    saveChar(current_char);
-                    state = 16;
-                    continue;
-                }
-                switch (current_char) {
-                    case '+':
-                    case '-':
-                        saveChar(current_char);
-                        state = 15;
-                        break;
-                    default:
-                        setToken(TK_ERROR, tokenText);
-                        return TK_ERROR; 
-                }
-                continue;
-
-            case 15: // Signo del exponente
-                if (isdigit(current_char)) {
-                    saveChar(current_char);
-                    state = 16;
-                    continue;
-                }
-                setToken(TK_ERROR, tokenText);
-                return TK_ERROR;
-
-            case 16: // Dígitos del exponente
-                if (isdigit(current_char)) {
-                    saveChar(current_char);
-                    continue;
-                }
-                retract(1);
-                setToken(TK_NUM, tokenText);
-                return TK_NUM;
                 
             default:
                 setToken(TK_ERROR, tokenText);
