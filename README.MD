@@ -21,4 +21,4 @@
 ---
 
 ### 📜 La Gramática Actual
-Actualmente, el cerebro del compilador procesa la elegancia del `if-then-else`
+Actualmente, el cerebro del compilador procesa tokens para expresiones aritméticas (+, *, (, ), identificadores, números, EOF).
