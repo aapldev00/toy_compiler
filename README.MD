@@ -22,3 +22,6 @@
 
 ### 📜 La Gramática Actual
 Actualmente, el cerebro del compilador procesa tokens para expresiones aritméticas (+, *, (, ), identificadores, números, EOF).
+
+### A futuro:
+Implementar parser LL(1), AST y reconocimiento semántico.
